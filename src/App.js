@@ -31,9 +31,8 @@ const App = () => {
     }
   }
 
-  return (
-    <div>
-
+  const loginForm = () => {
+    return(
       <form onSubmit={handleLogin}>
       <h2>Login Form</h2>
       <div>
@@ -55,12 +54,23 @@ const App = () => {
       </div>
       <button type='submit'>Login</button>
       </form>
+    )
+  }
 
+  const blogComponent = () =>{
+    return(
+      <div>
+        <h2>blogs</h2>
+        {blogs.map(blog =>
+          <Blog key={blog.id} blog={blog} />
+        )}
+      </div>
+    )
+  }
 
-      <h2>blogs</h2>
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
-      )}
+  return (
+    <div>
+      {user === null ? loginForm() : blogComponent()}
     </div>
   )
 }

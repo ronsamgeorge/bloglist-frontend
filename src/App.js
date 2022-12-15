@@ -16,12 +16,22 @@ const App = () => {
     )  
   }, [])
 
+  // check for logged in user in Local Storage
+  useEffect(() => {
+    const loggedInUserInfo = window.localStorage.getItem('loggedInUser');
+    if (loggedInUserInfo){
+      setUser(JSON.parse(loggedInUserInfo));
+    }
+  }, [])
+
   const handleLogin = async (event) => {
     event.preventDefault();
     console.log('logging in with',username, password);
 
     try{
       const userInfo = await loginService.login({username,password});
+
+      window.localStorage.setItem('loggedInUser', JSON.stringify(userInfo));
       setUser(userInfo);
       setUsername('');
       setPassword('');
@@ -38,9 +48,9 @@ const App = () => {
       <div>
         username
         <input 
-        type='text'
-        value={username}
-        onChange={({target}) => setUsername(target.value)}>
+          type='text'
+          value={username}
+          onChange={({target}) => setUsername(target.value)}>
         </input>
       </div>
 
@@ -61,6 +71,7 @@ const App = () => {
     return(
       <div>
         <h2>blogs</h2>
+        <p>{user.name} logged in</p>
         {blogs.map(blog =>
           <Blog key={blog.id} blog={blog} />
         )}

@@ -3,6 +3,16 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
+const Notification = ({message}) => {
+  if(message === null){
+    return null;
+  }
+  return (
+    <div className='error'>
+      {message}
+    </div>
+  )
+}
 
 const Heading = ({displayText}) => {
   return(
@@ -18,6 +28,7 @@ const App = () => {
   const [author, setAuthor] = useState('');
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
+  const [notification, setNotification] = useState(null);
 
 
   useEffect(() => {
@@ -48,7 +59,7 @@ const App = () => {
       setUsername('');
       setPassword('');
     } catch(exception){
-      console.log('invalid credentials')
+      setNotification('invalid credentials')
     }
   }
 
@@ -75,12 +86,26 @@ const App = () => {
         setAuthor('');
         setTitle('');
         setUrl('');
+
+        setNotification('Blog Posted');
+        setTimeout(() => {
+          setNotification(null)
+        },5000);
+
+
+      }).catch(err => {
+        setNotification(err.message)
+        setTimeout(() => {
+          setNotification(null)
+        },5000);
       })
   }
   
   if(user===null){
     return(
-      <form onSubmit={handleLogin}>
+      <div>
+        <Notification message={notification}/>
+        <form onSubmit={handleLogin}>
         <Heading displayText='login' />
         <div>
           username
@@ -101,11 +126,14 @@ const App = () => {
         </div>
         <button type='submit'>Login</button>
       </form>
+      </div>
+      
     )
   }
 
   return(
     <div>
+        <Notification message={notification} />
         <h2>blogs</h2>
         <p>{user.name} logged in</p>
         <button onClick={handleLogout}>logout</button>

@@ -3,11 +3,21 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
+
+const Heading = ({displayText}) => {
+  return(
+      <h2>{displayText}</h2>
+  )
+}
+
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [user,setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [author, setAuthor] = useState('');
+  const [title, setTitle] = useState('');
+  const [url, setUrl] = useState('');
 
 
   useEffect(() => {
@@ -20,7 +30,8 @@ const App = () => {
   useEffect(() => {
     const loggedInUserInfo = window.localStorage.getItem('loggedInUser');
     if (loggedInUserInfo){
-      setUser(JSON.parse(loggedInUserInfo));
+      blogService.setToken(JSON.parse(loggedInUserInfo).jwtUserToken)  // setting token value for local saved login
+      setUser(JSON.parse(loggedInUserInfo));                          
     }
   }, [])
 
@@ -30,12 +41,12 @@ const App = () => {
 
     try{
       const userInfo = await loginService.login({username,password});
-
       window.localStorage.setItem('loggedInUser', JSON.stringify(userInfo));
+      console.log(userInfo);
+      blogService.setToken(userInfo.jwtUserToken);
       setUser(userInfo);
       setUsername('');
       setPassword('');
-
     } catch(exception){
       console.log('invalid credentials')
     }
@@ -46,49 +57,87 @@ const App = () => {
     setUser(null);                                   // resets user state to null and will render login 
   }
 
-  const loginForm = () => {
+
+  const handlePost = (event) => {
+    event.preventDefault();
+    console.log("posting blog ...");
+
+    const newBlog = {
+      author,
+      title,
+      url
+    }
+
+    console.log(newBlog);
+    blogService.postBlog(newBlog)
+      .then(returnedNote => {
+        setBlogs(blogs.concat(returnedNote));
+        setAuthor('');
+        setTitle('');
+        setUrl('');
+      })
+  }
+  
+  if(user===null){
     return(
       <form onSubmit={handleLogin}>
-      <h2>Login Form</h2>
-      <div>
-        username
-        <input 
-          type='text'
-          value={username}
-          onChange={({target}) => setUsername(target.value)}>
-        </input>
-      </div>
+        <Heading displayText='login' />
+        <div>
+          username
+          <input 
+            type='text'
+            value={username}
+            onChange={({target}) => setUsername(target.value)}>
+          </input>
+        </div>
 
-      <div>
-        password
-        <input
-        type='password'
-        value={password}
-        onChange={({target}) => setPassword(target.value)}>
-        </input>
-      </div>
-      <button type='submit'>Login</button>
+        <div>
+          password
+          <input
+          type='password'
+          value={password}
+          onChange={({target}) => setPassword(target.value)}>
+          </input>
+        </div>
+        <button type='submit'>Login</button>
       </form>
     )
   }
 
-  const blogComponent = () =>{
-    return(
-      <div>
+  return(
+    <div>
         <h2>blogs</h2>
         <p>{user.name} logged in</p>
         <button onClick={handleLogout}>logout</button>
         {blogs.map(blog =>
           <Blog key={blog.id} blog={blog} />
         )}
-      </div>
-    )
-  }
 
-  return (
-    <div>
-      {user === null ? loginForm() : blogComponent()}
-    </div>
+        <form onSubmit={handlePost}>
+    
+          <p>title</p>
+          <input 
+          type='text'
+          value={title}
+          onChange={({target}) => setTitle(target.value)}
+          ></input>
+
+          <p>Author</p>
+          <input 
+            type='text'
+            value={author}
+            onChange={({target}) => setAuthor(target.value)}
+          ></input>
+
+          <p>URL</p>
+          <input 
+            type='text'
+            value={url}
+            onChange={({target}) => setUrl(target.value)}
+          ></input>
+          <button type='submit'>Submit Blog</button>
+        </form>
+      </div>
   )
 }
 

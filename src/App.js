@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
-import loginService from './services/login'
+import loginService from './services/login';
+import NewNoteForm from './components/NewNoteForm';
 
 const Notification = ({message}) => {
   if(message === null){
@@ -29,6 +30,7 @@ const App = () => {
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [notification, setNotification] = useState(null);
+  const [formVisible, setFormVisible] = useState(false);
 
 
   useEffect(() => {
@@ -100,6 +102,32 @@ const App = () => {
         },5000);
       })
   }
+
+  // Render the form when new Blog button is clicked
+  const noteForm = () => {
+    const hideWhenVisible = {display : formVisible ? 'none' : ''};
+    const showWhenVisible = { display : formVisible ? '' : 'none'};
+    return (
+      <div>
+        <div style={hideWhenVisible}>
+          <button onClick={()=> setFormVisible(true)}>Add New Blog</button>
+        </div>
+
+        <div style={showWhenVisible}>
+        <NewNoteForm 
+          handlePost={handlePost}
+          title={title}
+          author={author}
+          url={url}
+          handleTitle={({target}) => setTitle(target.value)}
+          handleAuthor={({target}) => setAuthor(target.value)}
+          handleUrl = {({target}) => setUrl(target.value)}
+        />
+        <button onClick={()=>setFormVisible(false)}>Cancel</button>
+        </div>
+      </div>
+    )
+  }
   
   if(user===null){
     return(
@@ -140,31 +168,10 @@ const App = () => {
         {blogs.map(blog =>
           <Blog key={blog.id} blog={blog} />
         )}
-
-        <form onSubmit={handlePost}>
-    
-          <p>title</p>
-          <input 
-          type='text'
-          value={title}
-          onChange={({target}) => setTitle(target.value)}
-          ></input>
-
-          <p>Author</p>
-          <input 
-            type='text'
-            value={author}
-            onChange={({target}) => setAuthor(target.value)}
-          ></input>
-
-          <p>URL</p>
-          <input 
-            type='text'
-            value={url}
-            onChange={({target}) => setUrl(target.value)}
-          ></input>
-          <button type='submit'>Submit Blog</button>
-        </form>
+        
+        {noteForm()}
+       
+      
       </div>
   )
 }

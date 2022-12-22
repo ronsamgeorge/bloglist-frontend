@@ -3,6 +3,7 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login';
 import NewNoteForm from './components/NewNoteForm';
+import Togglable from './components/Togglable';
 
 const Notification = ({message}) => {
   if(message === null){
@@ -30,7 +31,6 @@ const App = () => {
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [notification, setNotification] = useState(null);
-  const [formVisible, setFormVisible] = useState(false);
 
 
   useEffect(() => {
@@ -105,16 +105,9 @@ const App = () => {
 
   // Render the form when new Blog button is clicked
   const noteForm = () => {
-    const hideWhenVisible = {display : formVisible ? 'none' : ''};
-    const showWhenVisible = { display : formVisible ? '' : 'none'};
     return (
-      <div>
-        <div style={hideWhenVisible}>
-          <button onClick={()=> setFormVisible(true)}>Add New Blog</button>
-        </div>
-
-        <div style={showWhenVisible}>
-        <NewNoteForm 
+      <Togglable buttonLabel="New Note">
+         <NewNoteForm 
           handlePost={handlePost}
           title={title}
           author={author}
@@ -123,9 +116,8 @@ const App = () => {
           handleAuthor={({target}) => setAuthor(target.value)}
           handleUrl = {({target}) => setUrl(target.value)}
         />
-        <button onClick={()=>setFormVisible(false)}>Cancel</button>
-        </div>
-      </div>
+      </Togglable>
+       
     )
   }
   
